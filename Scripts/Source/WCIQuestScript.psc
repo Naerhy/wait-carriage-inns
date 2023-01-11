@@ -66,12 +66,12 @@ Function WaitForCarriageDriver()
 EndFunction
 
 Function Travel(Int Index)
+	Game.FastTravel(FastTravelMarkers[Index])
 	if (Index < 5)
 		Game.GetPlayer().RemoveItem(Gold001, CarriageCost.GetValue() as int)
 	else
 		Game.GetPlayer().RemoveItem(Gold001, CarriageCostSmall.GetValue() as int)
 	endIf
-	Game.FastTravel(FastTravelMarkers[Index])
 EndFunction
 
 Function ResetQuest()
