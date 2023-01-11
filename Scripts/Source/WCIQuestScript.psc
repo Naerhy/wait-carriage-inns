@@ -58,9 +58,9 @@ Function WaitForCarriageDriver()
 		FadeToBlackHoldImod.ApplyCrossFade(1.5)
 		Utility.Wait(1.5)
 		WCICarriageDriver.Enable()
+		Debug.Notification("A carriage driver has entered the inn.")
 		Utility.Wait(1.5)
 		ImageSpaceModifier.RemoveCrossFade(1.5)
-		Debug.Notification("A carriage driver has entered the inn.")
 		Game.EnablePlayerControls()
 	endIf
 EndFunction
