@@ -6,7 +6,7 @@ Scriptname WCI_TIF__0200333D Extends TopicInfo Hidden
 Function Fragment_0(ObjectReference akSpeakerRef)
 Actor akSpeaker = akSpeakerRef as Actor
 ;BEGIN CODE
-(GetOwningQuest() as WCIQuestScript).MovePlayer(4)
+(GetOwningQuest() as WCIQuestScript).Travel(4)
 ;END CODE
 EndFunction
 ;END FRAGMENT

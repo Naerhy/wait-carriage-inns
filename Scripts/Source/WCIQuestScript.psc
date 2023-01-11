@@ -1,7 +1,10 @@
 Scriptname WCIQuestScript extends Quest conditional
 
+GlobalVariable property CarriageCost auto
+GlobalVariable property CarriageCostSmall auto
 ImageSpaceModifier property FadeToBlackHoldImod auto
 Keyword property LocTypeInn auto
+MiscObject property Gold001 auto
 ObjectReference property WCICarriageDriver auto
 
 ObjectReference[] property FastTravelMarkers auto
@@ -62,7 +65,12 @@ Function WaitForCarriageDriver()
 	endIf
 EndFunction
 
-Function MovePlayer(Int Index)
+Function Travel(Int Index)
+	if (Index < 5)
+		Game.GetPlayer().RemoveItem(Gold001, CarriageCost.GetValue() as int)
+	else
+		Game.GetPlayer().RemoveItem(Gold001, CarriageCostSmall.GetValue() as int)
+	endIf
 	Game.FastTravel(FastTravelMarkers[Index])
 EndFunction
 
