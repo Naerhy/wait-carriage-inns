@@ -2,6 +2,7 @@ Scriptname WCIQuestScript extends Quest conditional
 
 GlobalVariable property carriageCost auto
 GlobalVariable property carriageCostSmall auto
+GlobalVariable property carriageCostHouse auto
 ImageSpaceModifier property fadeToBlackHoldImod auto
 Keyword property locTypeInn auto
 MiscObject property gold auto
@@ -13,6 +14,7 @@ bool waitingForDriver conditional
 Location currentPlayerInnLoc
 
 Event OnInit()
+	carriageCostHouse.SetValue(carriageCost.GetValue() + carriageCostSmall.GetValue())
 	waitingForDriver = false
 	currentPlayerInnLoc = Game.GetPlayer().GetCurrentLocation()
 EndEvent
@@ -78,8 +80,10 @@ Function Travel(int index)
 	endIf
 	if (index < 5)
 		player.RemoveItem(gold, carriageCost.GetValue() as int)
-	else
+	elseif (index < 18)
 		player.RemoveItem(gold, carriageCostSmall.GetValue() as int)
+	else
+		player.RemoveItem(gold, carriageCostHouse.GetValue() as int)
 	endIf
 EndFunction
 
