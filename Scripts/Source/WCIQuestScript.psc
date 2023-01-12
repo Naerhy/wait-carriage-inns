@@ -66,11 +66,20 @@ Function WaitForCarriageDriver()
 EndFunction
 
 Function Travel(Int Index)
+	Actor Player = Game.GetPlayer()
+	Float OverweightValue = Player.GetActorValue("CarryWeight") - Player.GetActorValue("InventoryWeight")
+
+	if (OverweightValue < 0)
+		Player.ModActorValue("CarryWeight", -OverweightValue)
+	endIf
 	Game.FastTravel(FastTravelMarkers[Index])
+	if (OverweightValue < 0)
+		Player.ModActorValue("CarryWeight", OverweightValue)
+	endIf
 	if (Index < 5)
-		Game.GetPlayer().RemoveItem(Gold001, CarriageCost.GetValue() as int)
+		Player.RemoveItem(Gold001, CarriageCost.GetValue() as int)
 	else
-		Game.GetPlayer().RemoveItem(Gold001, CarriageCostSmall.GetValue() as int)
+		Player.RemoveItem(Gold001, CarriageCostSmall.GetValue() as int)
 	endIf
 EndFunction
 
