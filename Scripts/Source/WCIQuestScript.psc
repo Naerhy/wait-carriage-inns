@@ -1,63 +1,63 @@
 Scriptname WCIQuestScript extends Quest conditional
 
-GlobalVariable property CarriageCost auto
-GlobalVariable property CarriageCostSmall auto
-ImageSpaceModifier property FadeToBlackHoldImod auto
-Keyword property LocTypeInn auto
-MiscObject property Gold001 auto
-ObjectReference property WCICarriageDriver auto
+GlobalVariable property carriageCost auto
+GlobalVariable property carriageCostSmall auto
+ImageSpaceModifier property fadeToBlackHoldImod auto
+Keyword property locTypeInn auto
+MiscObject property gold auto
+ObjectReference property carriageDriver auto
 
-ObjectReference[] property FastTravelMarkers auto
+ObjectReference[] property fastTravelMarkers auto
 
-Bool WaitingForDriver conditional
-Location CurrentPlayerInn
+bool waitingForDriver conditional
+Location currentPlayerInnLoc
 
 Event OnInit()
-	WaitingForDriver = false
-	CurrentPlayerInn = Game.GetPlayer().GetCurrentLocation()
+	waitingForDriver = false
+	currentPlayerInnLoc = Game.GetPlayer().GetCurrentLocation()
 EndEvent
 
 Event OnUpdate()
-	Location CurrentLoc = Game.GetPlayer().GetCurrentLocation()
+	Location currentPlayerLoc = Game.GetPlayer().GetCurrentLocation()
 
 	Debug.Notification("OnUpdate.")
-	if (CurrentLoc != CurrentPlayerInn)
+	if (currentPlayerLoc != currentPlayerInnLoc)
 		Debug.Notification("Resetting the quest.")
 		ResetQuest()
-		if (CurrentLoc.HasKeyword(LocTypeInn))
-			CurrentPlayerInn = CurrentLoc
+		if (currentPlayerLoc.HasKeyword(LocTypeInn))
+			currentPlayerInnLoc = currentPlayerLoc
 		endIf
 	endIf
 EndEvent
 
-Function UpdateLocation(Location OldLoc, Location NewLoc)
-	if (!WaitingForDriver && NewLoc.HasKeyword(LocTypeInn))
-		Debug.Notification("CurrentPlayerInn has been updated.")
-		CurrentPlayerInn = NewLoc
+Function UpdateLocation(Location oldLoc, Location newLoc)
+	if (!waitingForDriver && newLoc.HasKeyword(locTypeInn))
+		Debug.Notification("currentPlayerInnLoc has been updated.")
+		currentPlayerInnLoc = newLoc
 	endIf
-	if (WaitingForDriver && OldLoc == CurrentPlayerInn)
+	if (waitingForDriver && oldLoc == currentPlayerInnLoc)
 		Debug.Notification("Registering for update.")
 		RegisterForSingleUpdate(20.0)
 	endIf
 EndFunction
 
-Function SetWaitingForDriver(Bool WaitingStatus)
-	WaitingForDriver = WaitingStatus
+Function SetWaitingForDriver(bool waitingStatus)
+	waitingForDriver = waitingStatus
 EndFunction
 
 Function CheckSitCondition()
-	if (WaitingForDriver && Game.GetPlayer().GetCurrentLocation() == CurrentPlayerInn)
+	if (waitingForDriver && Game.GetPlayer().GetCurrentLocation() == currentPlayerInnLoc)
 		WaitForCarriageDriver()
 	endIf
 EndFunction
 
 Function WaitForCarriageDriver()
-	if (WCICarriageDriver.IsDisabled())
-		WCICarriageDriver.MoveTo(Game.GetPlayer())
+	if (carriageDriver.IsDisabled())
+		carriageDriver.MoveTo(Game.GetPlayer())
 		Game.DisablePlayerControls(true, true, true, true, true, true, true, true)
-		FadeToBlackHoldImod.ApplyCrossFade(1.5)
+		fadeToBlackHoldImod.ApplyCrossFade(1.5)
 		Utility.Wait(1.5)
-		WCICarriageDriver.Enable()
+		carriageDriver.Enable()
 		Debug.Notification("A carriage driver has entered the inn.")
 		Utility.Wait(1.5)
 		ImageSpaceModifier.RemoveCrossFade(1.5)
@@ -65,27 +65,27 @@ Function WaitForCarriageDriver()
 	endIf
 EndFunction
 
-Function Travel(Int Index)
-	Actor Player = Game.GetPlayer()
-	Float OverweightValue = Player.GetActorValue("CarryWeight") - Player.GetActorValue("InventoryWeight")
+Function Travel(int index)
+	Actor player = Game.GetPlayer()
+	float deltaWeight = player.GetActorValue("CarryWeight") - player.GetActorValue("InventoryWeight")
 
-	if (OverweightValue < 0)
-		Player.ModActorValue("CarryWeight", -OverweightValue)
+	if (deltaWeight < 0)
+		player.ModActorValue("CarryWeight", -deltaWeight)
 	endIf
-	Game.FastTravel(FastTravelMarkers[Index])
-	if (OverweightValue < 0)
-		Player.ModActorValue("CarryWeight", OverweightValue)
+	Game.FastTravel(fastTravelMarkers[index])
+	if (deltaWeight < 0)
+		player.ModActorValue("CarryWeight", deltaWeight)
 	endIf
-	if (Index < 5)
-		Player.RemoveItem(Gold001, CarriageCost.GetValue() as int)
+	if (index < 5)
+		player.RemoveItem(gold, carriageCost.GetValue() as int)
 	else
-		Player.RemoveItem(Gold001, CarriageCostSmall.GetValue() as int)
+		player.RemoveItem(gold, carriageCostSmall.GetValue() as int)
 	endIf
 EndFunction
 
 Function ResetQuest()
-	if (WCICarriageDriver.IsEnabled())
-		WCICarriageDriver.Disable()
+	if (carriageDriver.IsEnabled())
+		carriageDriver.Disable()
 	endIf
-	WaitingForDriver = false
+	waitingForDriver = false
 EndFunction
