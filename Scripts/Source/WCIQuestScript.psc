@@ -4,15 +4,19 @@ GlobalVariable property carriageCost auto
 GlobalVariable property carriageCostSmall auto
 GlobalVariable property carriageCostHouse auto
 ImageSpaceModifier property fadeToBlackHoldImod auto
+Location property tamrielLoc auto
+Location[] property disabledLocations auto
 MiscObject property gold auto
 ObjectReference property carriageDriver auto
 ObjectReference[] property fastTravelMarkers auto
 
+bool showInnkeeperDialogue conditional
 bool waitForDriver conditional
 Location waitLocation
 
 Event OnInit()
 	carriageCostHouse.SetValue(carriageCost.GetValue() + carriageCostSmall.GetValue())
+	showInnkeeperDialogue = IsValidCell() && !IsInDisabledLocs(Game.GetPlayer().GetCurrentLocation())
 	waitForDriver = false
 	waitLocation = none
 EndEvent
@@ -24,6 +28,28 @@ Event OnUpdate()
 		ResetQuest()
 	endIf
 EndEvent
+
+bool Function IsValidCell()
+	Cell currentCell = Game.GetPlayer().GetParentCell()
+
+	return currentCell && currentCell.IsInterior()
+EndFunction
+
+bool Function IsInDisabledLocs(Location loc)
+	int i = 0
+	int j = disabledLocations.Length
+
+	if (!tamrielLoc.IsChild(loc))
+		return true
+	endIf
+	while (i < j)
+		if (disabledLocations[i].IsChild(loc))
+			return true
+		endIf
+		i += 1
+	endWhile
+	return false
+EndFunction
 
 Function RequestDriver()
 	waitForDriver = true
@@ -73,7 +99,9 @@ Function Travel(int index)
 	ImageSpaceModifier.RemoveCrossFade(1.5)
 EndFunction
 
-Function UpdateLocation(Location oldLoc)
+Function UpdateLocation(Location oldLoc, Location newLoc)
+	showInnkeeperDialogue = IsValidCell() && !IsInDisabledLocs(newLoc)
+	Debug.Notification(showInnkeeperDialogue as string)
 	if (waitForDriver && oldLoc == waitLocation)
 		Debug.Notification("Registering for update.")
 		RegisterForSingleUpdate(20.0)
