@@ -4,51 +4,34 @@ GlobalVariable property carriageCost auto
 GlobalVariable property carriageCostSmall auto
 GlobalVariable property carriageCostHouse auto
 ImageSpaceModifier property fadeToBlackHoldImod auto
-Keyword property locTypeInn auto
 MiscObject property gold auto
 ObjectReference property carriageDriver auto
-
 ObjectReference[] property fastTravelMarkers auto
 
-bool waitingForDriver conditional
-Location currentPlayerInnLoc
+bool waitForDriver conditional
+Location waitLocation
 
 Event OnInit()
 	carriageCostHouse.SetValue(carriageCost.GetValue() + carriageCostSmall.GetValue())
-	waitingForDriver = false
-	currentPlayerInnLoc = Game.GetPlayer().GetCurrentLocation()
+	waitForDriver = false
+	waitLocation = none
 EndEvent
 
 Event OnUpdate()
-	Location currentPlayerLoc = Game.GetPlayer().GetCurrentLocation()
-
 	Debug.Notification("OnUpdate.")
-	if (currentPlayerLoc != currentPlayerInnLoc)
+	if (Game.GetPlayer().GetCurrentLocation() != waitLocation)
 		Debug.Notification("Resetting the quest.")
 		ResetQuest()
-		if (currentPlayerLoc.HasKeyword(LocTypeInn))
-			currentPlayerInnLoc = currentPlayerLoc
-		endIf
 	endIf
 EndEvent
 
-Function UpdateLocation(Location oldLoc, Location newLoc)
-	if (!waitingForDriver && newLoc.HasKeyword(locTypeInn))
-		Debug.Notification("currentPlayerInnLoc has been updated.")
-		currentPlayerInnLoc = newLoc
-	endIf
-	if (waitingForDriver && oldLoc == currentPlayerInnLoc)
-		Debug.Notification("Registering for update.")
-		RegisterForSingleUpdate(20.0)
-	endIf
-EndFunction
-
-Function SetWaitingForDriver(bool waitingStatus)
-	waitingForDriver = waitingStatus
+Function RequestDriver()
+	waitForDriver = true
+	waitLocation = Game.GetPlayer().GetCurrentLocation()
 EndFunction
 
 Function CheckSitCondition()
-	if (waitingForDriver && Game.GetPlayer().GetCurrentLocation() == currentPlayerInnLoc)
+	if (waitForDriver && Game.GetPlayer().GetCurrentLocation() == waitLocation)
 		WaitForCarriageDriver()
 	endIf
 EndFunction
@@ -87,9 +70,17 @@ Function Travel(int index)
 	endIf
 EndFunction
 
+Function UpdateLocation(Location oldLoc)
+	if (waitForDriver && oldLoc == waitLocation)
+		Debug.Notification("Registering for update.")
+		RegisterForSingleUpdate(20.0)
+	endIf
+EndFunction
+
 Function ResetQuest()
 	if (carriageDriver.IsEnabled())
 		carriageDriver.Disable()
 	endIf
-	waitingForDriver = false
+	waitForDriver = false
+	waitLocation = None
 EndFunction

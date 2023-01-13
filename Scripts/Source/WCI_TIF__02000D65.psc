@@ -6,7 +6,7 @@ Scriptname WCI_TIF__02000D65 Extends TopicInfo Hidden
 Function Fragment_1(ObjectReference akSpeakerRef)
 Actor akSpeaker = akSpeakerRef as Actor
 ;BEGIN CODE
-(GetOwningQuest() as WCIQuestScript).SetWaitingForDriver(true)
+(GetOwningQuest() as WCIQuestScript).RequestDriver()
 ;END CODE
 EndFunction
 ;END FRAGMENT
