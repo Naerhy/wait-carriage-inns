@@ -54,6 +54,8 @@ Function Travel(int index)
 	Actor player = Game.GetPlayer()
 	float deltaWeight = player.GetActorValue("CarryWeight") - player.GetActorValue("InventoryWeight")
 
+	fadeToBlackHoldImod.ApplyCrossFade(1.5)
+	Utility.Wait(1.5)
 	if (deltaWeight < 0)
 		player.ModActorValue("CarryWeight", -deltaWeight)
 	endIf
@@ -68,6 +70,7 @@ Function Travel(int index)
 	else
 		player.RemoveItem(gold, carriageCostHouse.GetValue() as int)
 	endIf
+	ImageSpaceModifier.RemoveCrossFade(1.5)
 EndFunction
 
 Function UpdateLocation(Location oldLoc)
@@ -82,5 +85,5 @@ Function ResetQuest()
 		carriageDriver.Disable()
 	endIf
 	waitForDriver = false
-	waitLocation = None
+	waitLocation = none
 EndFunction
