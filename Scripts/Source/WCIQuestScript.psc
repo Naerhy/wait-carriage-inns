@@ -8,16 +8,18 @@ Keyword property locTypeInn auto
 Location property tamrielLoc auto
 Location[] property disabledLocations auto
 MiscObject property gold auto
-ObjectReference property carriageDriver auto
+ObjectReference[] property carriageDrivers auto
 ObjectReference[] property fastTravelMarkers auto
 
 bool showInnkeeperDialogue conditional
 bool waitForDriver conditional
+int activeDriver
 Location waitLocation
 
 Event OnInit()
 	carriageCostHouse.SetValue(carriageCost.GetValue() + carriageCostSmall.GetValue())
 	showInnkeeperDialogue = IsAccurateInnLoc(Game.GetPlayer().GetCurrentLocation())
+	activeDriver = -1
 	waitForDriver = false
 	waitLocation = none
 EndEvent
@@ -52,6 +54,7 @@ EndFunction
 Function RequestDriver()
 	waitForDriver = true
 	waitLocation = Game.GetPlayer().GetCurrentLocation()
+	activeDriver = Utility.RandomInt(0, 2)
 EndFunction
 
 Function CheckSitCondition()
@@ -61,12 +64,12 @@ Function CheckSitCondition()
 EndFunction
 
 Function WaitForCarriageDriver()
-	if (carriageDriver.IsDisabled())
-		carriageDriver.MoveTo(Game.GetPlayer())
+	if (carriageDrivers[activeDriver].IsDisabled())
+		carriageDrivers[activeDriver].MoveTo(Game.GetPlayer())
 		Game.DisablePlayerControls(true, true, true, true, true, true, true, true)
 		fadeToBlackHoldImod.ApplyCrossFade(1.5)
 		Utility.Wait(1.5)
-		carriageDriver.Enable()
+		carriageDrivers[activeDriver].Enable()
 		Debug.Notification("A carriage driver has entered the inn.")
 		Utility.Wait(1.5)
 		ImageSpaceModifier.RemoveCrossFade(1.5)
@@ -107,9 +110,10 @@ Function UpdateLocation(Location oldLoc, Location newLoc)
 EndFunction
 
 Function ResetQuest()
-	if (carriageDriver.IsEnabled())
-		carriageDriver.Disable()
+	if (carriageDrivers[activeDriver].IsEnabled())
+		carriageDrivers[activeDriver].Disable()
 	endIf
 	waitForDriver = false
 	waitLocation = none
+	activeDriver = -1
 EndFunction
