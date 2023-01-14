@@ -4,6 +4,7 @@ GlobalVariable property carriageCost auto
 GlobalVariable property carriageCostSmall auto
 GlobalVariable property carriageCostHouse auto
 ImageSpaceModifier property fadeToBlackHoldImod auto
+Keyword property locTypeInn auto
 Location property tamrielLoc auto
 Location[] property disabledLocations auto
 MiscObject property gold auto
@@ -16,7 +17,7 @@ Location waitLocation
 
 Event OnInit()
 	carriageCostHouse.SetValue(carriageCost.GetValue() + carriageCostSmall.GetValue())
-	showInnkeeperDialogue = IsValidCell() && !IsInDisabledLocs(Game.GetPlayer().GetCurrentLocation())
+	showInnkeeperDialogue = IsAccurateInnLoc(Game.GetPlayer().GetCurrentLocation())
 	waitForDriver = false
 	waitLocation = none
 EndEvent
@@ -29,20 +30,17 @@ Event OnUpdate()
 	endIf
 EndEvent
 
-bool Function IsValidCell()
-	Cell currentCell = Game.GetPlayer().GetParentCell()
-
-	return currentCell && currentCell.IsInterior()
-EndFunction
-
-bool Function IsInDisabledLocs(Location loc)
-	int i = 0
-	int j = disabledLocations.Length
-
-	if (!tamrielLoc.IsChild(loc))
+bool Function IsAccurateInnLoc(Location loc)
+	if (loc.HasKeyword(locTypeInn) && tamrielLoc.IsChild(loc) && !IsDisabledLoc(loc))
 		return true
 	endIf
-	while (i < j)
+	return false
+EndFunction
+
+bool Function IsDisabledLoc(Location loc)
+	int i = 0
+
+	while (i < disabledLocations.Length)
 		if (disabledLocations[i].IsChild(loc))
 			return true
 		endIf
@@ -100,7 +98,7 @@ Function Travel(int index)
 EndFunction
 
 Function UpdateLocation(Location oldLoc, Location newLoc)
-	showInnkeeperDialogue = IsValidCell() && !IsInDisabledLocs(newLoc)
+	showInnkeeperDialogue = IsAccurateInnLoc(newLoc)
 	Debug.Notification(showInnkeeperDialogue as string)
 	if (waitForDriver && oldLoc == waitLocation)
 		Debug.Notification("Registering for update.")
