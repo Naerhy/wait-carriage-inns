@@ -25,9 +25,7 @@ Event OnInit()
 EndEvent
 
 Event OnUpdate()
-	Debug.Notification("OnUpdate.")
 	if (Game.GetPlayer().GetCurrentLocation() != waitLocation)
-		Debug.Notification("Resetting the quest.")
 		ResetQuest()
 	endIf
 EndEvent
@@ -102,9 +100,7 @@ EndFunction
 
 Function UpdateLocation(Location oldLoc, Location newLoc)
 	showInnkeeperDialogue = IsAccurateInnLoc(newLoc)
-	Debug.Notification(showInnkeeperDialogue as string)
 	if (waitForDriver && oldLoc == waitLocation)
-		Debug.Notification("Registering for update.")
 		RegisterForSingleUpdate(20.0)
 	endIf
 EndFunction
