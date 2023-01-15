@@ -21,6 +21,7 @@ Event OnInit()
 	SetDefaultValues()
 	showInnkeeperDialogue = IsAccurateInnLoc(playerRef.GetCurrentLocation())
 	carriageCostHouse.SetValue(carriageCost.GetValue() + carriageCostSmall.GetValue())
+	Debug.Trace("WCI: script has been initialized")
 EndEvent
 
 Event OnUpdate()
@@ -38,6 +39,7 @@ EndFunction
 Function UpdateLocation(Location oldLoc, Location newLoc)
 	showInnkeeperDialogue = IsAccurateInnLoc(newLoc)
 	if (waitForDriver && oldLoc == waitLocation)
+		Debug.Trace("WCI: player left waitLocation " + (waitLocation.GetFormID() as string) + ", registering for update")
 		RegisterForSingleUpdate(20.0)
 	endIf
 EndFunction
@@ -65,6 +67,7 @@ Function RequestDriver()
 	waitForDriver = true
 	waitLocation = playerRef.GetCurrentLocation()
 	activeDriver = Utility.RandomInt(0, 2)
+	Debug.Trace("WCI: player has requested carriage driver " + (activeDriver as string) + " in waitLocation " + (waitLocation.GetFormID() as string))
 EndFunction
 
 Function CheckSitCondition()
@@ -84,12 +87,14 @@ Function WaitForCarriageDriver()
 		Utility.Wait(1.5)
 		ImageSpaceModifier.RemoveCrossFade(1.5)
 		Game.EnablePlayerControls()
+		Debug.Trace("WCI: carriage driver " + (activeDriver as string) + " has been enabled")
 	endIf
 EndFunction
 
 Function Travel(int index)
 	float deltaWeight = playerRef.GetActorValue("CarryWeight") - playerRef.GetActorValue("InventoryWeight")
 
+	Debug.Trace("WCI: player travel - START")
 	fadeToBlackHoldImod.ApplyCrossFade(1.5)
 	Utility.Wait(1.5)
 	if (deltaWeight < 0)
@@ -107,6 +112,7 @@ Function Travel(int index)
 		playerRef.RemoveItem(gold, carriageCostHouse.GetValue() as int)
 	endIf
 	ImageSpaceModifier.RemoveCrossFade(1.5)
+	Debug.Trace("WCI: player travel - END")
 EndFunction
 
 Function ResetQuest()
@@ -114,4 +120,5 @@ Function ResetQuest()
 		carriageDrivers[activeDriver].Disable()
 	endIf
 	SetDefaultValues()
+	Debug.Trace("WCI: quest has been reset")
 EndFunction
