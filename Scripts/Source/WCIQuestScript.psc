@@ -18,9 +18,7 @@ int activeDriver
 Location waitLocation
 
 Event OnInit()
-	waitForDriver = false
-	waitLocation = none
-	activeDriver = -1
+	SetDefaultValues()
 	showInnkeeperDialogue = IsAccurateInnLoc(playerRef.GetCurrentLocation())
 	carriageCostHouse.SetValue(carriageCost.GetValue() + carriageCostSmall.GetValue())
 EndEvent
@@ -30,6 +28,12 @@ Event OnUpdate()
 		ResetQuest()
 	endIf
 EndEvent
+
+Function SetDefaultValues()
+	waitForDriver = false
+	waitLocation = none
+	activeDriver = -1
+EndFunction
 
 Function UpdateLocation(Location oldLoc, Location newLoc)
 	showInnkeeperDialogue = IsAccurateInnLoc(newLoc)
@@ -72,7 +76,7 @@ EndFunction
 Function WaitForCarriageDriver()
 	if (carriageDrivers[activeDriver].IsDisabled())
 		carriageDrivers[activeDriver].MoveTo(playerRef)
-		Game.DisablePlayerControls(true, true, true, true, true, true, true, true)
+		Game.DisablePlayerControls()
 		fadeToBlackHoldImod.ApplyCrossFade(1.5)
 		Utility.Wait(1.5)
 		carriageDrivers[activeDriver].Enable()
@@ -109,7 +113,5 @@ Function ResetQuest()
 	if (carriageDrivers[activeDriver].IsEnabled())
 		carriageDrivers[activeDriver].Disable()
 	endIf
-	waitForDriver = false
-	waitLocation = none
-	activeDriver = -1
+	SetDefaultValues()
 EndFunction
