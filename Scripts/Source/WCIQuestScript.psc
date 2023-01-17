@@ -1,6 +1,7 @@
 Scriptname WCIQuestScript extends Quest conditional
 
 Actor property playerRef auto
+ActorBase[] property carriageDrivers auto
 GlobalVariable property carriageCost auto
 GlobalVariable property carriageCostSmall auto
 GlobalVariable property carriageCostHouse auto
@@ -9,16 +10,20 @@ Keyword property locTypeInn auto
 Location property tamrielLoc auto
 Location[] property disabledLocations auto
 MiscObject property gold auto
-ObjectReference[] property carriageDrivers auto
 ObjectReference[] property fastTravelMarkers auto
 
+Actor activeDriver
 bool showInnkeeperDialogue conditional
 bool waitForDriver conditional
-int activeDriver
+float spawnX
+float spawnY
+float spawnZ
+int indexDriver
 Location waitLocation
 
 Event OnInit()
 	SetDefaultValues()
+	SetSpawnPos()
 	showInnkeeperDialogue = IsAccurateInnLoc(playerRef.GetCurrentLocation())
 	carriageCostHouse.SetValue(carriageCost.GetValue() + carriageCostSmall.GetValue())
 	Debug.Trace("WCI: script has been initialized")
@@ -31,16 +36,26 @@ Event OnUpdate()
 EndEvent
 
 Function SetDefaultValues()
+	activeDriver = none
 	waitForDriver = false
 	waitLocation = none
-	activeDriver = -1
+	indexDriver = -1
+EndFunction
+
+Function SetSpawnPos()
+	spawnX = playerRef.x
+	spawnY = playerRef.y
+	spawnZ = playerRef.z
 EndFunction
 
 Function UpdateLocation(Location oldLoc, Location newLoc)
 	showInnkeeperDialogue = IsAccurateInnLoc(newLoc)
+	if (showInnkeeperDialogue)
+		SetSpawnPos()
+	endIf
 	if (waitForDriver && oldLoc == waitLocation)
 		Debug.Trace("WCI: player left waitLocation " + (waitLocation.GetFormID() as string) + ", registering for update")
-		RegisterForSingleUpdate(20.0)
+		RegisterForSingleUpdate(60.0)
 	endIf
 EndFunction
 
@@ -66,28 +81,28 @@ EndFunction
 Function RequestDriver()
 	waitForDriver = true
 	waitLocation = playerRef.GetCurrentLocation()
-	activeDriver = Utility.RandomInt(0, 2)
-	Debug.Trace("WCI: player has requested carriage driver " + (activeDriver as string) + " in waitLocation " + (waitLocation.GetFormID() as string))
+	indexDriver = Utility.RandomInt(0, 2)
+	Debug.Trace("WCI: player has requested carriage driver " + (indexDriver as string) + " in waitLocation " + (waitLocation.GetFormID() as string))
 EndFunction
 
 Function CheckSitCondition()
 	if (waitForDriver && playerRef.GetCurrentLocation() == waitLocation)
-		WaitForCarriageDriver()
+		SpawnCarriageDriver()
 	endIf
 EndFunction
 
-Function WaitForCarriageDriver()
-	if (carriageDrivers[activeDriver].IsDisabled())
-		carriageDrivers[activeDriver].MoveTo(playerRef)
+Function SpawnCarriageDriver()
+	if (!activeDriver)
 		Game.DisablePlayerControls()
 		fadeToBlackHoldImod.ApplyCrossFade(1.5)
 		Utility.Wait(1.5)
-		carriageDrivers[activeDriver].Enable()
+		activeDriver = playerRef.PlaceActorAtMe(carriageDrivers[indexDriver])
+		activeDriver.SetPosition(spawnX, spawnY, spawnZ)
 		Debug.Notification("A carriage driver has entered the inn.")
 		Utility.Wait(1.5)
 		ImageSpaceModifier.RemoveCrossFade(1.5)
 		Game.EnablePlayerControls()
-		Debug.Trace("WCI: carriage driver " + (activeDriver as string) + " has been enabled")
+		Debug.Trace("WCI: carriage driver " + (indexDriver as string) + " has been enabled")
 	endIf
 EndFunction
 
@@ -116,8 +131,9 @@ Function Travel(int index)
 EndFunction
 
 Function ResetQuest()
-	if (carriageDrivers[activeDriver].IsEnabled())
-		carriageDrivers[activeDriver].Disable()
+	if (activeDriver)
+		activeDriver.Disable()
+		activeDriver.Delete()
 	endIf
 	SetDefaultValues()
 	Debug.Trace("WCI: quest has been reset")
