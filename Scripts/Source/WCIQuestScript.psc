@@ -86,7 +86,7 @@ EndFunction
 Function RequestDriver()
 	waitForDriver = true
 	waitLocation = playerRef.GetCurrentLocation()
-	indexDriver = Utility.RandomInt(0, 2)
+	indexDriver = Utility.RandomInt(0, 3)
 	Debug.Trace("WCI: player has requested carriage driver " + (indexDriver as string) \
 			+ " in " + (waitLocation.GetFormID() as string) + " (RequestDriver)")
 EndFunction
