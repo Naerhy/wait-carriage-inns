@@ -65,10 +65,10 @@ Function UpdateLocation(Location oldLoc, Location newLoc)
 EndFunction
 
 bool Function IsAccurateInnLoc(Location loc)
-	if (loc.HasKeyword(locTypeInn) && tamrielLoc.IsChild(loc) && !IsDisabledLoc(loc))
-		return true
+	if (!loc || !loc.HasKeyword(locTypeInn) || !tamrielLoc.IsChild(loc) || IsDisabledLoc(loc))
+		return false
 	endIf
-	return false
+	return true
 EndFunction
 
 bool Function IsDisabledLoc(Location loc)
@@ -103,13 +103,17 @@ Function SpawnCarriageDriver()
 		fadeToBlackHoldImod.ApplyCrossFade(1.5)
 		Utility.Wait(1.5)
 		activeDriver = playerRef.PlaceActorAtMe(carriageDrivers[indexDriver])
-		activeDriver.SetPosition(spawnX, spawnY, spawnZ)
-		Debug.Notification("A carriage driver has entered the inn.")
+		if (!activeDriver)
+			Debug.Notification("WCI: a carriage driver couldn't be spawned, reset the quest.")
+		else
+			activeDriver.SetPosition(spawnX, spawnY, spawnZ)
+			Debug.Notification("A carriage driver has entered the inn.")
+			Debug.Trace("WCI: carriage driver " + (indexDriver as string) \
+				+ " has been spawned (SpawnCarriageDriver)")
+		endIf
 		Utility.Wait(1.5)
 		ImageSpaceModifier.RemoveCrossFade(1.5)
 		Game.EnablePlayerControls()
-		Debug.Trace("WCI: carriage driver " + (indexDriver as string) \
-				+ " has been spawned (SpawnCarriageDriver)")
 	endIf
 EndFunction
 
