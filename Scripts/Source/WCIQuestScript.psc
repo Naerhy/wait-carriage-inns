@@ -15,6 +15,7 @@ ObjectReference[] property fastTravelMarkers auto
 Actor activeDriver
 bool showInnkeeperDialogue conditional
 bool waitForDriver conditional
+float registerTime
 float spawnX
 float spawnY
 float spawnZ
@@ -26,10 +27,11 @@ Event OnInit()
 	SetSpawnPos()
 	showInnkeeperDialogue = IsAccurateInnLoc(playerRef.GetCurrentLocation())
 	carriageCostHouse.SetValue(carriageCost.GetValue() + carriageCostSmall.GetValue())
-	Debug.Trace("WCI: script has been initialized")
+	Debug.Trace("WCI: script has been initialized (OnInit)")
 EndEvent
 
 Event OnUpdate()
+	Debug.Trace("WCI: update (OnUpdate)")
 	if (playerRef.GetCurrentLocation() != waitLocation)
 		ResetQuest()
 	endIf
@@ -40,6 +42,7 @@ Function SetDefaultValues()
 	waitForDriver = false
 	waitLocation = none
 	indexDriver = -1
+	registerTime = 60.0
 EndFunction
 
 Function SetSpawnPos()
@@ -54,8 +57,10 @@ Function UpdateLocation(Location oldLoc, Location newLoc)
 		SetSpawnPos()
 	endIf
 	if (waitForDriver && oldLoc == waitLocation)
-		Debug.Trace("WCI: player left waitLocation " + (waitLocation.GetFormID() as string) + ", registering for update")
-		RegisterForSingleUpdate(60.0)
+		Debug.Trace("WCI: player is waiting for driver and has left " \
+				+ (waitLocation.GetFormID() as string) + ", registering for update in " \
+				+ (registerTime as string) + "s (UpdateLocation)")
+		RegisterForSingleUpdate(registerTime)
 	endIf
 EndFunction
 
@@ -82,7 +87,8 @@ Function RequestDriver()
 	waitForDriver = true
 	waitLocation = playerRef.GetCurrentLocation()
 	indexDriver = Utility.RandomInt(0, 2)
-	Debug.Trace("WCI: player has requested carriage driver " + (indexDriver as string) + " in waitLocation " + (waitLocation.GetFormID() as string))
+	Debug.Trace("WCI: player has requested carriage driver " + (indexDriver as string) \
+			+ " in " + (waitLocation.GetFormID() as string) + " (RequestDriver)")
 EndFunction
 
 Function CheckSitCondition()
@@ -102,32 +108,38 @@ Function SpawnCarriageDriver()
 		Utility.Wait(1.5)
 		ImageSpaceModifier.RemoveCrossFade(1.5)
 		Game.EnablePlayerControls()
-		Debug.Trace("WCI: carriage driver " + (indexDriver as string) + " has been enabled")
+		Debug.Trace("WCI: carriage driver " + (indexDriver as string) \
+				+ " has been spawned (SpawnCarriageDriver)")
 	endIf
 EndFunction
 
 Function Travel(int index)
-	float deltaWeight = playerRef.GetActorValue("CarryWeight") - playerRef.GetActorValue("InventoryWeight")
+	float dw = playerRef.GetActorValue("CarryWeight") - playerRef.GetActorValue("InventoryWeight")
 
-	Debug.Trace("WCI: player travel - START")
+	Debug.Trace("WCI: preparing to move player (Travel)")
+	registerTime = 1.0
 	fadeToBlackHoldImod.ApplyCrossFade(1.5)
 	Utility.Wait(1.5)
-	if (deltaWeight < 0)
-		playerRef.ModActorValue("CarryWeight", -deltaWeight)
+	if (dw < 0)
+		playerRef.ModActorValue("CarryWeight", -dw)
 	endIf
 	Game.FastTravel(fastTravelMarkers[index])
-	if (deltaWeight < 0)
-		playerRef.ModActorValue("CarryWeight", deltaWeight)
+	if (dw < 0)
+		playerRef.ModActorValue("CarryWeight", dw)
 	endIf
-	if (index < 5)
-		playerRef.RemoveItem(gold, carriageCost.GetValue() as int)
-	elseif (index < 18)
-		playerRef.RemoveItem(gold, carriageCostSmall.GetValue() as int)
-	else
-		playerRef.RemoveItem(gold, carriageCostHouse.GetValue() as int)
-	endIf
+	playerRef.RemoveItem(gold, GetTravelCost(index))
 	ImageSpaceModifier.RemoveCrossFade(1.5)
-	Debug.Trace("WCI: player travel - END")
+	Debug.Trace("WCI: player has been moved (Travel)")
+EndFunction
+
+int Function GetTravelCost(int index)
+	if (index < 5)
+		return carriageCost.GetValue() as int
+	elseif (index < 18)
+		return carriageCostSmall.GetValue() as int
+	else
+		return carriageCostHouse.GetValue() as int
+	endIf
 EndFunction
 
 Function ResetQuest()
@@ -136,5 +148,5 @@ Function ResetQuest()
 		activeDriver.Delete()
 	endIf
 	SetDefaultValues()
-	Debug.Trace("WCI: quest has been reset")
+	Debug.Trace("WCI: quest has been reset (ResetQuest)")
 EndFunction
