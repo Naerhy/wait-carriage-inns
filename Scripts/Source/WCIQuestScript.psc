@@ -1,14 +1,19 @@
 Scriptname WCIQuestScript extends Quest conditional
 
+;/ the mod doesn't use a formlist to check if an inn is located in a city because 
+a mod could be adding new inns in these cities and the user would be forced to 
+add these new locations to the list /;
+
 Actor property playerRef auto
 ActorBase[] property carriageDrivers auto
+FormList property disabledUserLoc auto
 GlobalVariable property carriageCost auto
 GlobalVariable property carriageCostSmall auto
 GlobalVariable property carriageCostHouse auto
 ImageSpaceModifier property fadeToBlackHoldImod auto
 Keyword property locTypeInn auto
 Location property tamrielLoc auto
-Location[] property disabledLocations auto
+Location[] property citiesLoc auto
 MiscObject property gold auto
 ObjectReference[] property fastTravelMarkers auto
 
@@ -65,17 +70,18 @@ Function UpdateLocation(Location oldLoc, Location newLoc)
 EndFunction
 
 bool Function IsAccurateInnLoc(Location loc)
-	if (!loc || !loc.HasKeyword(locTypeInn) || !tamrielLoc.IsChild(loc) || IsDisabledLoc(loc))
+	if (!loc || !loc.HasKeyword(locTypeInn) || !tamrielLoc.IsChild(loc) \
+			|| disabledUserLoc.HasForm(loc) || IsLocInCities(loc))
 		return false
 	endIf
 	return true
 EndFunction
 
-bool Function IsDisabledLoc(Location loc)
+bool Function IsLocInCities(Location loc)
 	int i = 0
 
-	while (i < disabledLocations.Length)
-		if (disabledLocations[i].IsChild(loc))
+	while (i < citiesLoc.Length)
+		if (citiesLoc[i].IsChild(loc))
 			return true
 		endIf
 		i += 1
