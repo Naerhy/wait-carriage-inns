@@ -160,3 +160,7 @@ Function ResetQuest()
 	SetDefaultValues()
 	Debug.Trace("WCI: quest has been reset (ResetQuest)")
 EndFunction
+
+bool Function GetSIDValue()
+	return showInnkeeperDialogue
+EndFunction
