@@ -128,6 +128,7 @@ Function Travel(int index)
 
 	Debug.Trace("WCI: preparing to move player (Travel)")
 	registerTime = 1.0
+	playerRef.RemoveItem(gold, GetTravelCost(index))
 	fadeToBlackHoldImod.ApplyCrossFade(1.5)
 	Utility.Wait(1.5)
 	if (dw < 0)
@@ -137,7 +138,6 @@ Function Travel(int index)
 	if (dw < 0)
 		playerRef.ModActorValue("CarryWeight", dw)
 	endIf
-	playerRef.RemoveItem(gold, GetTravelCost(index))
 	ImageSpaceModifier.RemoveCrossFade(1.5)
 	Debug.Trace("WCI: player has been moved (Travel)")
 EndFunction
