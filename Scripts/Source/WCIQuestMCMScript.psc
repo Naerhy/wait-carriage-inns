@@ -56,13 +56,18 @@ Event OnConfigInit()
 EndEvent
 
 Event OnPageReset(string page)
-	SetCursorFillMode(TOP_TO_BOTTOM)
-	if (page == "Enabled destinations")
-		RenderEnabledDestinationsPage()
-	elseif (page == "Excluded inn locations")
-		RenderExcludedInnLocationsPage()
+	if (page == "")
+		LoadCustomContent("WaitCarriageInns.esp/mcm_banner.dds", 376 - (600 / 2), 223 - (400 / 2))
 	else
-		; no action is needed
+		UnloadCustomContent()
+		SetCursorFillMode(TOP_TO_BOTTOM)
+		if (page == "Enabled destinations")
+			RenderEnabledDestinationsPage()
+		elseif (page == "Excluded inn locations")
+			RenderExcludedInnLocationsPage()
+		else
+			; no action is needed
+		endIf
 	endIf
 EndEvent
 
